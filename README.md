@@ -1,1 +1,5 @@
-# Parcial_II_ExcusasSA
+# Parcial_II_ExcusasSA | Diseño de Sistemas
+
+### Alumnos:
+- Andrés Berillo
+- Juan Manuel Lukaszewicz
