@@ -1,11 +1,11 @@
 package com.excusas;
 
-import com.excusas.empleado.Empleado;
-import com.excusas.empleado.encargado.Recepcionista;
-import com.excusas.estrategia.Normal;
-import com.excusas.excusa.IExcusa;
-import com.excusas.excusa.motivo.Inverosimil;
-import com.excusas.servicio.EmailSenderImpl;
+import com.excusas.model.empleado.Empleado;
+import com.excusas.model.empleado.encargado.Recepcionista;
+import com.excusas.model.estrategia.Normal;
+import com.excusas.model.excusa.IExcusa;
+import com.excusas.model.excusa.motivo.Inverosimil;
+import com.excusas.service.EmailSenderImpl;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

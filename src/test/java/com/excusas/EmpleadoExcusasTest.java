@@ -1,8 +1,8 @@
 package com.excusas;
 
-import com.excusas.empleado.Empleado;
-import com.excusas.excusa.IExcusa;
-import com.excusas.excusa.motivo.Trivial;
+import com.excusas.model.empleado.Empleado;
+import com.excusas.model.excusa.IExcusa;
+import com.excusas.model.excusa.motivo.Trivial;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

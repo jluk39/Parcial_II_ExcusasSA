@@ -1,16 +1,15 @@
 package com.excusas;
 
-import com.excusas.empleado.Empleado;
-import com.excusas.empleado.encargado.IEncargado;
-import com.excusas.empleado.encargado.Recepcionista;
-import com.excusas.estrategia.Normal;
-import com.excusas.estrategia.Vago;
-import com.excusas.estrategia.Productivo;
-import com.excusas.excusa.Excusa;
-import com.excusas.excusa.IExcusa;
-import com.excusas.excusa.motivo.Inverosimil;
-import com.excusas.excusa.motivo.Trivial;
-import com.excusas.servicio.IEmailSender;
+import com.excusas.model.empleado.Empleado;
+import com.excusas.model.empleado.encargado.IEncargado;
+import com.excusas.model.empleado.encargado.Recepcionista;
+import com.excusas.model.estrategia.Normal;
+import com.excusas.model.estrategia.Vago;
+import com.excusas.model.estrategia.Productivo;
+import com.excusas.model.excusa.IExcusa;
+import com.excusas.model.excusa.motivo.Inverosimil;
+import com.excusas.model.excusa.motivo.Trivial;
+import com.excusas.service.IEmailSender;
 import org.junit.jupiter.api.*;
 
 import java.io.ByteArrayOutputStream;
