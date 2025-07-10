@@ -23,26 +23,61 @@ public class ExcusaService {
     @Autowired
     private ExcusaRepository excusaRepository;
 
+    @Autowired
+    private EmpleadoService empleadoService;
+
+    @Autowired
+    private MotivoService motivoService;
+
     public ExcusaResponseDTO crearExcusa(ExcusaRequestDTO request) {
         try {
-            Empleado empleado = new Empleado(
-                    request.getEmpleadoNombre(),
-                    request.getEmpleadoEmail(),
-                    request.getEmpleadoLegajo()
-            );
+            // Validaciones de negocio
+            validarRequest(request);
 
-            IMotivoExcusa motivo = crearMotivo(request.getTipoMotivo());
+            // Crear o buscar empleado
+            Empleado empleado = obtenerOCrearEmpleado(request);
+
+            // Crear motivo validado
+            IMotivoExcusa motivo = motivoService.crearMotivo(request.getTipoMotivo());
+
+            // Generar excusa
             IExcusa excusa = empleado.generarExcusa(motivo);
 
+            // Procesar por cadena de responsabilidad
             IEncargado cadenaEncargados = LineaDeEncargados.crearCadena();
-            cadenaEncargados.procesar(excusa);
+            cadenaEncargados.manejarExcusa(excusa);
 
+            // Persistir
             excusa = excusaRepository.save(excusa);
 
             return convertirAResponseDTO(excusa, request.getDescripcion());
         } catch (Exception e) {
             throw new RuntimeException("Error al crear excusa: " + e.getMessage());
         }
+    }
+
+    private void validarRequest(ExcusaRequestDTO request) {
+        if (request == null) {
+            throw new IllegalArgumentException("El request no puede ser null");
+        }
+
+        if (request.getDescripcion() == null || request.getDescripcion().trim().isEmpty()) {
+            throw new IllegalArgumentException("La descripción es obligatoria");
+        }
+
+        if (request.getDescripcion().length() > 500) {
+            throw new IllegalArgumentException("La descripción no puede exceder 500 caracteres");
+        }
+    }
+
+    private Empleado obtenerOCrearEmpleado(ExcusaRequestDTO request) {
+        // Buscar empleado existente por legajo
+        return empleadoService.buscarPorLegajo(request.getEmpleadoLegajo())
+                .orElseGet(() -> empleadoService.crearEmpleado(
+                        request.getEmpleadoNombre(),
+                        request.getEmpleadoEmail(),
+                        request.getEmpleadoLegajo()
+                ));
     }
 
     public List<ExcusaResponseDTO> obtenerTodasExcusas() {
@@ -91,9 +126,6 @@ public class ExcusaService {
     }
 
     private String determinarTipoMotivo(IMotivoExcusa motivo) {
-        if (motivo.esTrivial()) return "Trivial";
-        if (motivo.esModerada()) return "Moderada";
-        if (motivo.esCompleja()) return "Compleja";
-        return "Desconocido";
+        return motivo.getTipoMotivo();
     }
 }

@@ -10,13 +10,14 @@ public interface IExcusa {
     Long getId();
     void setId(Long id);
 
-    // Agregar estos métodos opcionales
     default String getDescripcion() {
         return getMotivo().getClass().getSimpleName();
     }
+    void setEstado(String estado);
+    void setEncargadoProcesador(String encargado);
 
     default String getEstado() {
-        return "PROCESADA";
+        return "PENDIENTE";
     }
 
     default String getEncargadoProcesador() {

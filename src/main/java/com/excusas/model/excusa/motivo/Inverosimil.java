@@ -14,4 +14,9 @@ public class Inverosimil extends MotivoExcusa {
     public boolean esInverosimil() {
         return true;
     }
+
+    @Override
+    public String getTipoMotivo() {
+        return "Inverosímil";
+    }
 }

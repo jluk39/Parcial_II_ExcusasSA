@@ -7,7 +7,7 @@ import com.excusas.model.excusa.motivo.IMotivoExcusa;
 public class Empleado {
     private final String nombre;
     private final String email;
-    private final int legajo;
+    private final Integer legajo;
 
     public Empleado(String nombre, String email, int legajo) {
         this.nombre = nombre;
@@ -23,7 +23,7 @@ public class Empleado {
         return email;
     }
 
-    public int getLegajo() {
+    public Integer getLegajo() {
         return legajo;
     }
 

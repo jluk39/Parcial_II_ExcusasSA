@@ -5,4 +5,9 @@ public abstract class Moderada extends MotivoExcusa {
     public boolean esModerada() {
         return true;
     }
+
+    @Override
+    public String getTipoMotivo() {
+        return "Moderada";
+    }
 }

@@ -8,6 +8,8 @@ public interface IMotivoExcusa {
     boolean esModerada();
     boolean esCompleja();
     boolean esInverosimil();
+    // Nuevo metodo que cada implementación debe definir
+    String getTipoMotivo();
     void procesarPor(Recepcionista r, IExcusa excusa);
     void procesarPor(SupervisorArea s, IExcusa excusa);
     void procesarPor(GerenteRRHH g, IExcusa excusa);

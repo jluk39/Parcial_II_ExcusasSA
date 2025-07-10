@@ -40,4 +40,10 @@ public abstract class MotivoExcusa implements IMotivoExcusa {
     public boolean esInverosimil() {
         return false;
     }
+
+    // Implementación por defecto
+    @Override
+    public String getTipoMotivo() {
+        return "Desconocido";
+    }
 }

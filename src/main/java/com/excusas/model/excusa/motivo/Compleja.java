@@ -20,4 +20,9 @@ public class Compleja extends MotivoExcusa {
     public boolean esInverosimil() {
         return false;
     }
+
+    @Override
+    public String getTipoMotivo() {
+        return "Compleja";
+    }
 }
