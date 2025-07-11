@@ -145,7 +145,138 @@ El patrón Singleton se aplicó en el `AdministradorProntuarios`, asegurando que
 
 Esta decisión garantiza consistencia en el almacenamiento de información y evita duplicación o pérdida de datos, especialmente útil en sistemas con múltiples fuentes de notificación.
 
+---
 
+## Diagrama de Clases
+
+```plantuml
+@startuml
+skinparam packageStyle rectangle
+
+' Interfaces principales
+interface IEncargado
+interface IModoResolucion
+interface IExcusa
+interface IMotivoExcusa
+interface IObservable
+interface IObserver
+interface IEmailSender
+interface IAdministradorProntuario
+
+
+' ================= Chain of Responsibility =================
+package "Patrón: Chain of Responsibility" <<pattern>> {
+
+  class Empleado {
+    +nombre: String
+    +email: String
+    +legajo: int
+  }
+  abstract class EncargadoBase extends Empleado {
+    -siguiente: IEncargado
+    -modo: IModoResolucion
+    +manejarExcusa(excusa: IExcusa): void
+  }
+  
+  ' ===== Template Method explicación =====
+note right of EncargadoBase
+Template Method:
+manejarExcusa() define el flujo.
+Subclases redefinen:
+- puedeManejar()
+- procesar()
+end note
+
+  IEncargado <|.. EncargadoBase
+  EncargadoBase --> IModoResolucion : usa
+
+  class Recepcionista
+  class SupervisorArea
+  class GerenteRRHH
+  class CEO
+
+  EncargadoBase <|-- Recepcionista
+  EncargadoBase <|-- SupervisorArea
+  EncargadoBase <|-- GerenteRRHH
+  EncargadoBase <|-- CEO
+
+  class Rechazador {
+    +manejarExcusa(excusa: IExcusa): void
+  }
+  IEncargado <|.. Rechazador
+}
+
+' ================= Strategy =================
+package "Patrón: Strategy" <<pattern>> {
+  class Normal
+  class Vago
+  class Productivo
+
+  IModoResolucion <|.. Normal
+  IModoResolucion <|.. Vago
+  IModoResolucion <|.. Productivo
+}
+
+' ================= Observer =================
+package "Patrón: Observer" <<pattern>> {
+  abstract class ObservableBase {
+    +agregarObserver()
+    +quitarObserver()
+    +notificarObservers()
+  }
+
+  class AdministradorProntuarios <<singleton>> {
+    +guardarProntuario(excusa: IExcusa)
+    +notificar()
+  }
+
+  IObservable <|.. ObservableBase
+  ObservableBase <|-- AdministradorProntuarios
+  IAdministradorProntuario <|.. AdministradorProntuarios
+
+  IObserver <|.. CEO
+  AdministradorProntuarios --> CEO : notifica
+}
+
+' ===== Excusa y sus relaciones =====
+class Excusa {
+  +motivo: IMotivoExcusa
+  +empleado: Empleado
+}
+
+Excusa --> Empleado : pertenece a
+Excusa --> IMotivoExcusa : tiene
+IExcusa <|.. Excusa
+
+' ===== Jerarquía de excusas =====
+abstract class MotivoExcusa
+class Trivial
+abstract class Moderada
+class Compleja
+class Inverosimil
+
+IMotivoExcusa <|.. MotivoExcusa
+MotivoExcusa <|-- Trivial
+MotivoExcusa <|-- Moderada
+MotivoExcusa <|-- Compleja
+MotivoExcusa <|-- Inverosimil
+
+' ===== Tipos específicos de excusas moderadas =====
+class CorteLuz
+class CuidadoFamiliar
+
+Moderada <|-- CorteLuz
+Moderada <|-- CuidadoFamiliar
+
+' ===== Email Sender =====
+class EmailSenderImpl {
+  +enviarEmail(destino, origen, asunto, cuerpo)
+}
+
+IEmailSender <|.. EmailSenderImpl
+EncargadoBase --> IEmailSender : usa
+@enduml
+```
 ---
 
 ## 🏗️ Arquitectura del Sistema
