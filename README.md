@@ -12,10 +12,15 @@ src/
 │   ├── java/com/excusas/
 │   │   ├── ExcusasSaApplication.java
 │   │   ├── controller/
-│   │   │   └──ExcusaController.java
+│   │   │   ├── ExcusaController.java
+│   │   │   ├── EmpleadoController.java
+│   │   │   ├── ProntuarioController.java
+│   │   │   └── EncargadoController.java
 │   │   ├── dto/
 │   │   │   ├── ExcusaRequestDTO.java
-│   │   │   └── ExcusaResponseDTO.java
+│   │   │   ├── ExcusaResponseDTO.java
+│   │   │   ├── EmpleadoRequestDTO.java
+│   │   │   └── EmpleadoResponseDTO.java
 │   │   ├── excepciones/
 │   │   │   └──ExcusaNoManejadaException.java
 │   │   ├── model/
@@ -55,10 +60,17 @@ src/
 │   │   │   ├── encargado/
 │   │   │   └── modo/
 │   │   ├── repository/
-│   │   │   └── ExcusaRepository.java
+│   │   │   ├── EmpleadoRepository.java
+│   │   │   ├── ExcusaRepository.java
+│   │   │   └── ProntuarioRepository.java
 │   │   │
 │   │   ├── service/
 │   │   │   ├── ExcusaService.java 
+│   │   │   ├── EmpleadoService.java
+│   │   │   ├── ProntuarioService.java
+│   │   │   ├── MotivoService.java
+│   │   │   ├── ValidacionService.java
+│   │   │   ├── EncargadoService.java
 │   │   │   ├── IEmailSender.java
 │   │   │   ├── LineaDeEncargados.java
 │   │   │   └── EmailSenderImpl.java
@@ -68,10 +80,26 @@ src/
 │       ├── ExcusaincorrectaTest.java
 │       ├── ModoResolucionTest.java
 │       ├── RecepcionistaTest.java
-│       ├── excusas/
-│       │   └── ExcusasSaApplicationTests.java
-│       └── integration/
-│           └── ExcusaIntegrationTests.java
+│       ├── repository/
+│       │   ├── EmpleadoRepositoryTest.java
+│       │   ├── ExcusaRepositoryTest.java
+│       │   └── ProntuarioRepositoryTest.java
+│       ├── service/
+│       │   ├── ExcusaServiceTest.java
+│       │   ├── EmpleadoServiceTest.java
+│       │   ├── ProntuarioServiceTest.java
+│       │   ├── MotivoServiceTest.java
+│       │   ├── ValidacionServiceTest.java
+│       │   └── EncargadoServiceTest.java
+│       ├── integration/
+│       │   ├── ExcusaIntegrationTest.java
+│       │   ├── NewEndpointsIntegrationTest.java
+│       │   ├── PersistenceIntegrationTest.java
+│       │   └── ServicesIntegrationTest.java
+│       ├── validation/
+│       │   └── NegocioValidationTest.java
+│       └── excusas/
+│           └── ExcusasSaApplicationTests.java
 └── resources/
     └── application.properties
 ```
@@ -297,8 +325,9 @@ EncargadoBase --> IEmailSender : usa
 - `ValidacionService`: Validaciones de datos de entrada
 
 #### **Repository Layer**
-- `ExcusaRepository`: Persistencia en memoria para excusas
-- `EmpleadoRepository`: Persistencia en memoria para empleados
+- `ExcusaRepository`: Persistencia JPA con H2 para excusas
+- `EmpleadoRepository`: Persistencia JPA con H2 para empleados  
+- `ProntuarioRepository`: Persistencia JPA con H2 para prontuarios
 
 #### **Model Layer**
 - Entidades de dominio con lógica de negocio encapsulada
@@ -340,15 +369,15 @@ EncargadoBase --> IEmailSender : usa
 
 ---
 
-## 🌐 API REST
+## 🌐 API REST Completa
 
-### Endpoints Disponibles:
+### 📋 **Endpoints Implementados**
 
-#### **Excusas**
+#### **🎫 Excusas (8 endpoints)**
 ```http
+# Crear nueva excusa
 POST /api/excusas
 Content-Type: application/json
-
 {
   "empleadoNombre": "Juan Pérez",
   "empleadoEmail": "juan@empresa.com",
@@ -356,27 +385,76 @@ Content-Type: application/json
   "tipoMotivo": "trivial",
   "descripcion": "Llegué tarde por el tráfico"
 }
+
+# Obtener todas las excusas
+GET /api/excusas
+
+# Obtener excusa específica por ID
+GET /api/excusas/{id}
+
+# Obtener excusas por legajo de empleado
+GET /api/excusas/legajo/{legajo}
+
+# Obtener excusas por nombre de empleado
+GET /api/excusas/empleado/{nombre}
+
+# Búsqueda avanzada con filtros
+GET /api/excusas/busqueda?legajo={legajo}&fechaDesde={fecha}&fechaHasta={fecha}
+
+# Obtener solo excusas rechazadas
+GET /api/excusas/rechazadas
+
+# Eliminar excusas anteriores a fecha límite
+DELETE /api/excusas/eliminar?fechaLimite={YYYY-MM-DD}
 ```
-GET /api/excusas                    # Obtener todas las excusas
-GET /api/excusas/{id}              # Obtener excusa por ID
-GET /api/excusas/empleado/{nombre} # Obtener excusas por empleado
 
-#### **Encargados**
+#### **👥 Empleados (3 endpoints)**
 ```http
-GET /api/encargados                # Estado actual de la cadena
+# Obtener todos los empleados
+GET /api/empleados
 
-POST /api/encargados/cambiarModo   # Cambiar modo de resolución
+# Crear nuevo empleado
+POST /api/empleados
 Content-Type: application/json
-
 {
-"encargadoId": "jeremias",
-"nuevoModo": "vago"
+  "nombre": "Ana García",
+  "email": "ana@empresa.com",
+  "legajo": 98765
 }
+
+# Obtener empleado por legajo
+GET /api/empleados/{legajo}
 ```
-#### **Prontuarios**
+
+#### **📋 Prontuarios (2 endpoints)**
 ```http
-GET /api/prontuarios                     # Todos los registros históricos
-GET /api/prontuarios/empleado/{nombre}  # Registros por empleado
+# Obtener todos los prontuarios
+GET /api/prontuarios
+
+# Obtener prontuarios por empleado
+GET /api/prontuarios/empleado/{nombre}
+```
+
+#### **👔 Encargados (3 endpoints)**
+```http
+# Obtener configuración actual de la cadena
+GET /api/encargados
+
+# Agregar nuevo encargado dinámicamente
+POST /api/encargados
+Content-Type: application/json
+{
+  "nombre": "Coach Motivacional",
+  "motivos": ["compleja", "inverosimil"]
+}
+
+# Cambiar modo de evaluación
+PUT /api/encargados/modo
+Content-Type: application/json
+{
+  "encargadoId": "jeremias",
+  "nuevoModo": "PRODUCTIVO"
+}
 ```
 
 La persistencia es en memoria utilizando `List<>` y `Map<>`, lo que permite un almacenamiento temporal durante la ejecución
@@ -454,6 +532,7 @@ Cobertura de Testing
 - `controller`: incluye capa REST y pruebas de integración
 - `service`: lógica de negocio y pruebas de integración
 - `final`: versión final con almacenamiento persistente y controladores funcionales
+- **`repository`**: **✅ Capa Repository con persistencia JPA/H2 completamente implementada**
 
 ---
 
