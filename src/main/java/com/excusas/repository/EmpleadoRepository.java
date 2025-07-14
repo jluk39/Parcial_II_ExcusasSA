@@ -1,42 +1,50 @@
-// src/main/java/com/excusas/repository/EmpleadoRepository.java
 package com.excusas.repository;
 
 import com.excusas.model.empleado.Empleado;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class EmpleadoRepository {
+public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
 
-    private final List<Empleado> empleados = new ArrayList<>();
+    /**
+     * Busca un empleado por su legajo
+     */
+    Optional<Empleado> findByLegajo(Integer legajo);
 
-    public Empleado save(Empleado empleado) {
-        // Remover si ya existe (actualización)
-        empleados.removeIf(e -> e.getLegajo().equals(empleado.getLegajo()));
-        empleados.add(empleado);
-        return empleado;
-    }
+    /**
+     * Busca un empleado por su email
+     */
+    Optional<Empleado> findByEmail(String email);
 
-    public List<Empleado> findAll() {
-        return new ArrayList<>(empleados);
-    }
+    /**
+     * Busca un empleado por su nombre (ignorando mayúsculas/minúsculas)
+     */
+    Optional<Empleado> findByNombreIgnoreCase(String nombre);
 
-    public Optional<Empleado> findByLegajo(Integer legajo) {
-        return empleados.stream()
-                .filter(e -> e.getLegajo().equals(legajo))
-                .findFirst();
-    }
+    /**
+     * Verifica si existe un empleado con el legajo dado
+     */
+    boolean existsByLegajo(Integer legajo);
 
-    public Optional<Empleado> findByNombre(String nombre) {
-        return empleados.stream()
-                .filter(e -> e.getNombre().equals(nombre))
-                .findFirst();
-    }
+    /**
+     * Verifica si existe un empleado con el email dado
+     */
+    boolean existsByEmail(String email);
 
-    public void deleteByLegajo(Integer legajo) {
-        empleados.removeIf(e -> e.getLegajo().equals(legajo));
-    }
+    /**
+     * Busca empleados por nombre que contenga el texto dado
+     */
+    @Query("SELECT e FROM Empleado e WHERE UPPER(e.nombre) LIKE UPPER(CONCAT('%', :nombre, '%'))")
+    List<Empleado> findByNombreContainingIgnoreCase(@Param("nombre") String nombre);
+
+    /**
+     * Obtiene todos los empleados ordenados por nombre
+     */
+    List<Empleado> findAllByOrderByNombreAsc();
 }

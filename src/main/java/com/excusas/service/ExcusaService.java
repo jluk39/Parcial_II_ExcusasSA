@@ -5,6 +5,7 @@ import com.excusas.dto.ExcusaResponseDTO;
 import com.excusas.model.empleado.Empleado;
 import com.excusas.model.empleado.encargado.IEncargado;
 import com.excusas.model.excusa.IExcusa;
+import com.excusas.model.excusa.Excusa;
 import com.excusas.model.excusa.motivo.IMotivoExcusa;
 import com.excusas.model.excusa.motivo.Trivial;
 import com.excusas.model.excusa.motivo.Moderada;
@@ -41,7 +42,8 @@ public class ExcusaService {
             IMotivoExcusa motivo = motivoService.crearMotivo(request.getTipoMotivo());
 
             // Generar excusa
-            IExcusa excusa = empleado.generarExcusa(motivo);
+            IExcusa iExcusa = empleado.generarExcusa(motivo);
+            Excusa excusa = (Excusa) iExcusa; // Cast necesario para JPA
 
             // Procesar por cadena de responsabilidad
             IEncargado cadenaEncargados = LineaDeEncargados.crearCadena();
@@ -111,21 +113,26 @@ public class ExcusaService {
     private ExcusaResponseDTO convertirAResponseDTO(IExcusa excusa, String descripcion) {
         ExcusaResponseDTO response = new ExcusaResponseDTO();
         response.setId(excusa.getId());
-        response.setEmpleadoNombre(excusa.getEmpleado().getNombre());
-        response.setTipoMotivo(determinarTipoMotivo(excusa.getMotivo()));
-        response.setDescripcion(descripcion);
-        response.setEstado(excusa.getEstado());
+        response.setEmpleadoNombre(excusa.getEmpleado() != null ? excusa.getEmpleado().getNombre() : "Sin empleado");
+        response.setTipoMotivo(excusa.getMotivo() != null ? determinarTipoMotivo(excusa.getMotivo()) : "Sin motivo");
+        response.setDescripcion(descripcion != null ? descripcion : "Sin descripción");
+        response.setEstado(excusa.getEstado() != null ? excusa.getEstado() : "PENDIENTE");
         response.setFechaCreacion(LocalDateTime.now());
-        response.setEncargadoProcesador(excusa.getEncargadoProcesador());
+        response.setEncargadoProcesador(excusa.getEncargadoProcesador() != null ? excusa.getEncargadoProcesador() : "Sistema");
         return response;
     }
 
     // Sobrecarga 2: para obtener (sin descripción personalizada)
     private ExcusaResponseDTO convertirAResponseDTO(IExcusa excusa) {
-        return convertirAResponseDTO(excusa, "Descripción no disponible");
+        return convertirAResponseDTO(excusa, excusa.getDescripcion());
     }
 
     private String determinarTipoMotivo(IMotivoExcusa motivo) {
-        return motivo.getTipoMotivo();
+        if (motivo == null) return "Desconocido";
+        try {
+            return motivo.getTipoMotivo();
+        } catch (Exception e) {
+            return motivo.getClass().getSimpleName();
+        }
     }
 }

@@ -4,7 +4,7 @@ package com.excusas.service;
 import com.excusas.dto.ExcusaRequestDTO;
 import com.excusas.dto.ExcusaResponseDTO;
 import com.excusas.model.empleado.Empleado;
-import com.excusas.model.excusa.IExcusa;
+import com.excusas.model.excusa.Excusa;
 import com.excusas.model.excusa.motivo.Trivial;
 import com.excusas.repository.ExcusaRepository;
 import org.junit.jupiter.api.Test;
@@ -42,8 +42,8 @@ public class ExcusaServiceTest {
 
         when(empleadoService.buscarPorLegajo(12345)).thenReturn(Optional.of(empleado));
         when(motivoService.crearMotivo("trivial")).thenReturn(motivo);
-        when(excusaRepository.save(any(IExcusa.class))).thenAnswer(invocation -> {
-            IExcusa excusa = invocation.getArgument(0);
+        when(excusaRepository.save(any(Excusa.class))).thenAnswer(invocation -> {
+            Excusa excusa = invocation.getArgument(0);
             excusa.setId(1L);
             return excusa;
         });
@@ -55,7 +55,7 @@ public class ExcusaServiceTest {
         assertNotNull(response);
         assertEquals("Juan Pérez", response.getEmpleadoNombre());
         assertEquals("Trivial", response.getTipoMotivo());
-        verify(excusaRepository, times(1)).save(any(IExcusa.class));
+        verify(excusaRepository, times(1)).save(any(Excusa.class));
     }
 
     @Test

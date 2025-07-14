@@ -1,46 +1,93 @@
 // src/main/java/com/excusas/repository/ExcusaRepository.java
 package com.excusas.repository;
 
-import com.excusas.model.excusa.IExcusa;
+import com.excusas.model.excusa.Excusa;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
-public class ExcusaRepository {
+public interface ExcusaRepository extends JpaRepository<Excusa, Long> {
 
-    private final List<IExcusa> excusas = new ArrayList<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+    /**
+     * Busca excusas por el legajo del empleado
+     */
+    @Query("SELECT e FROM Excusa e WHERE e.empleado.legajo = :legajo")
+    List<Excusa> findByEmpleadoLegajo(@Param("legajo") Integer legajo);
 
-    public IExcusa save(IExcusa excusa) {
-        // Asignar ID si no lo tiene
-        if (excusa.getId() == null) {
-            excusa.setId(idGenerator.getAndIncrement());
-        }
+    /**
+     * Busca excusas por el nombre del empleado
+     */
+    @Query("SELECT e FROM Excusa e WHERE e.empleado.nombre = :nombre")
+    List<Excusa> findByEmpleadoNombre(@Param("nombre") String nombre);
 
-        // Actualizar si ya existe
-        excusas.removeIf(e -> e.getId().equals(excusa.getId()));
-        excusas.add(excusa);
+    /**
+     * Busca excusas por estado
+     */
+    List<Excusa> findByEstado(String estado);
 
-        return excusa;
-    }
+    /**
+     * Busca excusas rechazadas
+     */
+    List<Excusa> findByEstadoOrderByFechaCreacionDesc(String estado);
 
-    public List<IExcusa> findAll() {
-        return new ArrayList<>(excusas);
-    }
+    /**
+     * Busca excusas por tipo de motivo
+     */
+    List<Excusa> findByTipoMotivo(String tipoMotivo);
 
-    public Optional<IExcusa> findById(Long id) {
-        return excusas.stream()
-                .filter(e -> e.getId().equals(id))
-                .findFirst();
-    }
+    /**
+     * Busca excusas por encargado procesador
+     */
+    List<Excusa> findByEncargadoProcesador(String encargadoProcesador);
 
-    public List<IExcusa> findByEmpleadoNombre(String nombre) {
-        return excusas.stream()
-                .filter(e -> e.getEmpleado().getNombre().equals(nombre))
-                .toList();
-    }
+    /**
+     * Busca excusas por rango de fechas
+     */
+    @Query("SELECT e FROM Excusa e WHERE e.fechaCreacion BETWEEN :fechaDesde AND :fechaHasta")
+    List<Excusa> findByFechaCreacionBetween(@Param("fechaDesde") LocalDateTime fechaDesde,
+                                           @Param("fechaHasta") LocalDateTime fechaHasta);
+
+    /**
+     * Busca excusas por legajo del empleado y rango de fechas
+     */
+    @Query("SELECT e FROM Excusa e WHERE e.empleado.legajo = :legajo AND e.fechaCreacion BETWEEN :fechaDesde AND :fechaHasta")
+    List<Excusa> findByEmpleadoLegajoAndFechaCreacionBetween(@Param("legajo") Integer legajo,
+                                                            @Param("fechaDesde") LocalDateTime fechaDesde,
+                                                            @Param("fechaHasta") LocalDateTime fechaHasta);
+
+    /**
+     * Busca excusas por múltiples criterios
+     */
+    @Query("SELECT e FROM Excusa e WHERE " +
+           "(:legajo IS NULL OR e.empleado.legajo = :legajo) AND " +
+           "(:tipoMotivo IS NULL OR e.tipoMotivo = :tipoMotivo) AND " +
+           "(:encargado IS NULL OR e.encargadoProcesador = :encargado) AND " +
+           "(:fechaDesde IS NULL OR e.fechaCreacion >= :fechaDesde) AND " +
+           "(:fechaHasta IS NULL OR e.fechaCreacion <= :fechaHasta)")
+    List<Excusa> findByMultipleCriteria(@Param("legajo") Integer legajo,
+                                       @Param("tipoMotivo") String tipoMotivo,
+                                       @Param("encargado") String encargado,
+                                       @Param("fechaDesde") LocalDateTime fechaDesde,
+                                       @Param("fechaHasta") LocalDateTime fechaHasta);
+
+    /**
+     * Elimina excusas anteriores a una fecha límite
+     */
+    @Query("DELETE FROM Excusa e WHERE e.fechaCreacion < :fechaLimite")
+    int deleteByFechaCreacionBefore(@Param("fechaLimite") LocalDateTime fechaLimite);
+
+    /**
+     * Cuenta excusas por estado
+     */
+    long countByEstado(String estado);
+
+    /**
+     * Obtiene todas las excusas ordenadas por fecha de creación (más recientes primero)
+     */
+    List<Excusa> findAllByOrderByFechaCreacionDesc();
 }
