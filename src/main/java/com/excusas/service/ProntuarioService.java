@@ -2,7 +2,7 @@
 package com.excusas.service;
 
 import com.excusas.dto.ExcusaResponseDTO;
-import com.excusas.model.excusa.IExcusa;
+import com.excusas.model.excusa.Excusa;
 import com.excusas.repository.ExcusaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,19 +33,15 @@ public class ProntuarioService {
                 .collect(Collectors.toList());
     }
 
-    private ExcusaResponseDTO convertirAProntuarioDTO(IExcusa excusa) {
+    private ExcusaResponseDTO convertirAProntuarioDTO(Excusa excusa) {
         ExcusaResponseDTO dto = new ExcusaResponseDTO();
         dto.setId(excusa.getId());
-        dto.setEmpleadoNombre(excusa.getEmpleado().getNombre());
-        dto.setTipoMotivo(determinarTipoMotivo(excusa));
-        dto.setDescripcion(excusa.getDescripcion());
+        dto.setEmpleadoNombre(excusa.getEmpleado() != null ? excusa.getEmpleado().getNombre() : "Sin empleado");
+        dto.setTipoMotivo(excusa.getTipoMotivo() != null ? excusa.getTipoMotivo() : "Sin motivo");
+        dto.setDescripcion(excusa.getDescripcion() != null ? excusa.getDescripcion() : "Sin descripción");
         dto.setEstado(excusa.getEstado());
-        dto.setFechaCreacion(LocalDateTime.now());
-        dto.setEncargadoProcesador(excusa.getEncargadoProcesador());
+        dto.setFechaCreacion(excusa.getFechaCreacion() != null ? excusa.getFechaCreacion() : LocalDateTime.now());
+        dto.setEncargadoProcesador(excusa.getEncargadoProcesador() != null ? excusa.getEncargadoProcesador() : "Sistema");
         return dto;
-    }
-
-    private String determinarTipoMotivo(IExcusa excusa) {
-        return excusa.getMotivo().getTipoMotivo();
     }
 }

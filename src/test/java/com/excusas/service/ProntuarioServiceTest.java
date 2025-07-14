@@ -9,6 +9,7 @@ import com.excusas.model.excusa.motivo.IMotivoExcusa;
 import com.excusas.model.excusa.motivo.Trivial;
 import com.excusas.model.excusa.motivo.Moderada;
 import com.excusas.model.excusa.motivo.Compleja;
+import com.excusas.model.excusa.motivo.CorteLuz;
 import com.excusas.repository.ExcusaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -117,7 +118,7 @@ public class ProntuarioServiceTest {
     public void testDeterminarTipoMotivo_Moderada() {
         // Arrange
         Empleado empleado = new Empleado("Test", "test@empresa.com", 123);
-        IMotivoExcusa motivo = new Moderada() {};
+        IMotivoExcusa motivo = new CorteLuz(); // Usar implementación concreta en lugar de clase anónima
         Excusa excusa = new Excusa(motivo, empleado);
         excusa.setId(1L);
         excusa.setEstado("PROCESADA");

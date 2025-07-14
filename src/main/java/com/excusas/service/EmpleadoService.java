@@ -37,7 +37,7 @@ public class EmpleadoService {
     }
 
     public Optional<Empleado> buscarPorNombre(String nombre) {
-        return empleadoRepository.findByNombre(nombre);
+        return empleadoRepository.findByNombreIgnoreCase(nombre);
     }
 
     private void validarDatosEmpleado(String nombre, String email, Integer legajo) {

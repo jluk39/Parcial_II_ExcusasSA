@@ -23,13 +23,10 @@ public abstract class EncargadoBase implements IEncargado {
 
     @Override
     public final void manejarExcusa(IExcusa excusa) {
-        if (puedeManejar(excusa)) {
-            modo.resolver(this, excusa);
-        } else if (siguiente != null) {
+        if (!puedeManejar(excusa) && siguiente != null) {
             siguiente.manejarExcusa(excusa);
         } else {
-            System.out.println("Excusa rechazada: ningún encargado puede procesarla");
-            excusa.setEstado("RECHAZADA");
+            modo.resolver(this, excusa);
         }
     }
 
