@@ -3,9 +3,11 @@ package com.excusas.repository;
 
 import com.excusas.model.excusa.Excusa;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -78,6 +80,8 @@ public interface ExcusaRepository extends JpaRepository<Excusa, Long> {
     /**
      * Elimina excusas anteriores a una fecha límite
      */
+    @Modifying
+    @Transactional
     @Query("DELETE FROM Excusa e WHERE e.fechaCreacion < :fechaLimite")
     int deleteByFechaCreacionBefore(@Param("fechaLimite") LocalDateTime fechaLimite);
 

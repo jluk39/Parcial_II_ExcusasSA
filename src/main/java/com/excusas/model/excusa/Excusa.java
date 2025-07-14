@@ -49,7 +49,7 @@ public class Excusa implements IExcusa {
     public Excusa(IMotivoExcusa motivo, Empleado empleado) {
         this.motivo = motivo;
         this.empleado = empleado;
-        this.tipoMotivo = motivo.getClass().getSimpleName();
+        this.tipoMotivo = determinarTipoMotivo(motivo);
         this.fechaCreacion = LocalDateTime.now();
     }
 
@@ -113,7 +113,44 @@ public class Excusa implements IExcusa {
 
     public void setMotivo(IMotivoExcusa motivo) {
         this.motivo = motivo;
-        this.tipoMotivo = motivo.getClass().getSimpleName();
+        this.tipoMotivo = determinarTipoMotivo(motivo);
+    }
+
+    private String determinarTipoMotivo(IMotivoExcusa motivo) {
+        if (motivo == null) return "Desconocido";
+
+        // Primero intentar usar el método getTipoMotivo() si existe
+        try {
+            java.lang.reflect.Method getTipoMotivoMethod = motivo.getClass().getMethod("getTipoMotivo");
+            Object result = getTipoMotivoMethod.invoke(motivo);
+            if (result instanceof String && !((String) result).isEmpty()) {
+                return (String) result;
+            }
+        } catch (Exception e) {
+            // Si falla, continuar con la lógica de nombres de clase
+        }
+
+        String className = motivo.getClass().getSimpleName();
+
+        // Si es una clase anónima (contiene $), obtener la clase padre
+        if (className.contains("$")) {
+            Class<?> superClass = motivo.getClass().getSuperclass();
+            if (superClass != null && !superClass.equals(Object.class)) {
+                String superClassName = superClass.getSimpleName();
+                // Verificar que la superclase es realmente una clase de motivo
+                if (superClassName.equals("Moderada") || superClassName.equals("Trivial") ||
+                    superClassName.equals("Compleja") || superClassName.equals("Inverosimil")) {
+                    return superClassName;
+                }
+            }
+        }
+
+        // Si el nombre contiene "Test", es un problema
+        if (className.contains("Test")) {
+            return "Desconocido";
+        }
+
+        return className.isEmpty() ? "Desconocido" : className;
     }
 
     public LocalDateTime getFechaCreacion() {

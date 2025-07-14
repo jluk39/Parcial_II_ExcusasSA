@@ -100,6 +100,44 @@ public class ExcusaService {
                 .collect(Collectors.toList());
     }
 
+    public List<ExcusaResponseDTO> obtenerExcusasPorLegajo(Integer legajo) {
+        return excusaRepository.findByEmpleadoLegajo(legajo).stream()
+                .map(this::convertirAResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<ExcusaResponseDTO> buscarExcusas(Integer legajo, String fechaDesde, String fechaHasta) {
+        try {
+            LocalDateTime desde = fechaDesde != null ? LocalDateTime.parse(fechaDesde + "T00:00:00") : null;
+            LocalDateTime hasta = fechaHasta != null ? LocalDateTime.parse(fechaHasta + "T23:59:59") : null;
+
+            if (desde != null && hasta != null) {
+                return excusaRepository.findByEmpleadoLegajoAndFechaCreacionBetween(legajo, desde, hasta).stream()
+                        .map(this::convertirAResponseDTO)
+                        .collect(Collectors.toList());
+            } else {
+                return obtenerExcusasPorLegajo(legajo);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error en formato de fechas. Use formato: YYYY-MM-DD");
+        }
+    }
+
+    public List<ExcusaResponseDTO> obtenerExcusasRechazadas() {
+        return excusaRepository.findByEstado("RECHAZADA").stream()
+                .map(this::convertirAResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public int eliminarExcusasAnterioresA(String fechaLimite) {
+        try {
+            LocalDateTime limite = LocalDateTime.parse(fechaLimite + "T23:59:59");
+            return excusaRepository.deleteByFechaCreacionBefore(limite);
+        } catch (Exception e) {
+            throw new RuntimeException("Error en formato de fecha. Use formato: YYYY-MM-DD");
+        }
+    }
+
     private IMotivoExcusa crearMotivo(String tipo) {
         return switch (tipo.toLowerCase()) {
             case "trivial" -> new Trivial();
