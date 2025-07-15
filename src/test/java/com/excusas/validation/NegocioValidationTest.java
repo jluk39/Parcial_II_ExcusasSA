@@ -72,13 +72,14 @@ public class NegocioValidationTest {
         );
         excusaService.crearExcusa(request1);
 
-        // Intentar crear segundo empleado con mismo legajo pero diferente nombre
+        // Intentar crear segunda excusa con mismo legajo pero diferente nombre/email
+        // Debe usar el empleado existente, no crear uno nuevo
         ExcusaRequestDTO request2 = new ExcusaRequestDTO(
             "Pedro Diferente", "pedro@empresa.com", 77777, "trivial",
             "Segunda excusa con legajo duplicado"
         );
 
-        // Debe usar el empleado existente, no crear uno nuevo
+        // No debe lanzar excepción, debe usar el empleado existente
         assertDoesNotThrow(() -> excusaService.crearExcusa(request2));
     }
 }

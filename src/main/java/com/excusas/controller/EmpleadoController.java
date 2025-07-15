@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/empleados")
-@CrossOrigin(origins = "*")
 public class EmpleadoController {
 
     @Autowired

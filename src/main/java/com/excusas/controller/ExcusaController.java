@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/excusas")
-@CrossOrigin(origins = "*")
 public class ExcusaController {
 
     @Autowired
