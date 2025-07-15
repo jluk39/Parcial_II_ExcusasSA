@@ -1,6 +1,7 @@
 // src/main/java/com/excusas/service/EmpleadoService.java
 package com.excusas.service;
 
+import com.excusas.excepciones.BusinessException;
 import com.excusas.model.empleado.Empleado;
 import com.excusas.repository.EmpleadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,10 @@ public class EmpleadoService {
 
         // Verificar que no existe empleado con mismo legajo
         if (empleadoRepository.findByLegajo(legajo).isPresent()) {
-            throw new IllegalArgumentException("Ya existe un empleado con legajo: " + legajo);
+            throw new BusinessException("Ya existe un empleado con legajo: " + legajo);
+        }
+        if (empleadoRepository.findByEmail(email).isPresent()) {
+            throw new BusinessException("Ya existe un empleado con email: " + email);
         }
 
         Empleado empleado = new Empleado(nombre, email, legajo);
@@ -33,6 +37,9 @@ public class EmpleadoService {
     }
 
     public Optional<Empleado> buscarPorLegajo(Integer legajo) {
+        if (legajo == null || legajo <= 0) {
+            throw new BusinessException("El legajo debe ser un número positivo");
+        }
         return empleadoRepository.findByLegajo(legajo);
     }
 
@@ -42,15 +49,15 @@ public class EmpleadoService {
 
     private void validarDatosEmpleado(String nombre, String email, Integer legajo) {
         if (nombre == null || nombre.trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre del empleado es obligatorio");
+            throw new BusinessException("El nombre del empleado es obligatorio");
         }
 
         if (email == null || !email.contains("@")) {
-            throw new IllegalArgumentException("El email debe ser válido");
+            throw new BusinessException("El email debe ser válido");
         }
 
         if (legajo == null || legajo <= 0) {
-            throw new IllegalArgumentException("El legajo debe ser un número positivo");
+            throw new BusinessException("El legajo debe ser un número positivo");
         }
     }
 }

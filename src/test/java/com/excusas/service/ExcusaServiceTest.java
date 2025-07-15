@@ -3,6 +3,7 @@ package com.excusas.service;
 
 import com.excusas.dto.ExcusaRequestDTO;
 import com.excusas.dto.ExcusaResponseDTO;
+import com.excusas.excepciones.BusinessException;
 import com.excusas.model.empleado.Empleado;
 import com.excusas.model.excusa.Excusa;
 import com.excusas.model.excusa.motivo.Trivial;
@@ -59,14 +60,59 @@ public class ExcusaServiceTest {
     }
 
     @Test
-    public void testCrearExcusa_ErrorMotivoInvalido() {
-        // Arrange
-        ExcusaRequestDTO request = new ExcusaRequestDTO("Juan Pérez", "juan.perez@empresa.com", 12345, "inexistente", "Motivo inválido");
+    public void testCrearExcusa_ErrorRequestNulo() {
+        Exception exception = assertThrows(BusinessException.class,
+            () -> excusaService.crearExcusa(null));
+        assertTrue(exception.getMessage().contains("request no puede ser null"));
+    }
 
+    @Test
+    public void testCrearExcusa_ErrorDescripcionObligatoria() {
+        ExcusaRequestDTO request = new ExcusaRequestDTO("Juan Pérez", "juan@empresa.com", 12345, "trivial", "");
+        Exception exception = assertThrows(BusinessException.class,
+            () -> excusaService.crearExcusa(request));
+        assertTrue(exception.getMessage().contains("descripción es obligatoria"));
+    }
+
+    @Test
+    public void testCrearExcusa_ErrorDescripcionMuyLarga() {
+        String descripcionLarga = "A".repeat(501);
+        ExcusaRequestDTO request = new ExcusaRequestDTO("Juan Pérez", "juan@empresa.com", 12345, "trivial", descripcionLarga);
+        Exception exception = assertThrows(BusinessException.class,
+            () -> excusaService.crearExcusa(request));
+        assertTrue(exception.getMessage().contains("no puede exceder 500 caracteres"));
+    }
+
+    @Test
+    public void testCrearExcusa_ErrorTipoMotivoObligatorio() {
+        ExcusaRequestDTO request = new ExcusaRequestDTO("Juan Pérez", "juan@empresa.com", 12345, "", "Motivo válido");
+        Exception exception = assertThrows(BusinessException.class,
+            () -> excusaService.crearExcusa(request));
+        assertTrue(exception.getMessage().contains("tipo de motivo es obligatorio"));
+    }
+
+    @Test
+    public void testCrearExcusa_ErrorTipoMotivoInvalido() {
+        ExcusaRequestDTO request = new ExcusaRequestDTO("Juan Pérez", "juan@empresa.com", 12345, "inexistente", "Motivo inválido");
         when(motivoService.crearMotivo("inexistente")).thenThrow(new IllegalArgumentException("Tipo de motivo no válido"));
-
-        // Act & Assert
-        Exception exception = assertThrows(RuntimeException.class, () -> excusaService.crearExcusa(request));
+        Exception exception = assertThrows(BusinessException.class,
+            () -> excusaService.crearExcusa(request));
         assertTrue(exception.getMessage().contains("Tipo de motivo no válido"));
+    }
+
+    @Test
+    public void testCrearExcusa_ErrorEmpleadoDatosInvalidos() {
+        ExcusaRequestDTO requestSinNombre = new ExcusaRequestDTO("", "juan@empresa.com", 12345, "trivial", "Motivo válido");
+        Exception exception = assertThrows(BusinessException.class,
+            () -> excusaService.crearExcusa(requestSinNombre));
+        assertTrue(exception.getMessage().contains("nombre del empleado es obligatorio"));
+        ExcusaRequestDTO requestSinEmail = new ExcusaRequestDTO("Juan Pérez", "", 12345, "trivial", "Motivo válido");
+        exception = assertThrows(BusinessException.class,
+            () -> excusaService.crearExcusa(requestSinEmail));
+        assertTrue(exception.getMessage().contains("email del empleado debe ser válido"));
+        ExcusaRequestDTO requestLegajoInvalido = new ExcusaRequestDTO("Juan Pérez", "juan@empresa.com", -1, "trivial", "Motivo válido");
+        exception = assertThrows(BusinessException.class,
+            () -> excusaService.crearExcusa(requestLegajoInvalido));
+        assertTrue(exception.getMessage().contains("legajo del empleado es obligatorio"));
     }
 }

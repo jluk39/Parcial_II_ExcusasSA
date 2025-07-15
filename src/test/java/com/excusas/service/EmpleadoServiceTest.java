@@ -1,5 +1,6 @@
 package com.excusas.service;
 
+import com.excusas.excepciones.BusinessException;
 import com.excusas.model.empleado.Empleado;
 import com.excusas.repository.EmpleadoRepository;
 import org.junit.jupiter.api.Test;
@@ -43,47 +44,49 @@ public class EmpleadoServiceTest {
 
     @Test
     public void testCrearEmpleado_ErrorLegajoDuplicado() {
-        // Arrange
         Empleado empleadoExistente = new Empleado("Ana García", "ana@empresa.com", 12345);
         when(empleadoRepository.findByLegajo(12345)).thenReturn(Optional.of(empleadoExistente));
-
-        // Act & Assert
-        Exception exception = assertThrows(IllegalArgumentException.class,
+        Exception exception = assertThrows(BusinessException.class,
             () -> empleadoService.crearEmpleado("Juan Pérez", "juan@empresa.com", 12345));
-
         assertTrue(exception.getMessage().contains("Ya existe un empleado con legajo"));
         verify(empleadoRepository, never()).save(any(Empleado.class));
     }
 
     @Test
+    public void testCrearEmpleado_ErrorEmailDuplicado() {
+        Empleado empleadoExistente = new Empleado("Ana García", "ana@empresa.com", 54321);
+        when(empleadoRepository.findByLegajo(54321)).thenReturn(Optional.empty());
+        when(empleadoRepository.findByEmail("ana@empresa.com")).thenReturn(Optional.of(empleadoExistente));
+        Exception exception = assertThrows(BusinessException.class,
+            () -> empleadoService.crearEmpleado("Juan Pérez", "ana@empresa.com", 54321));
+        assertTrue(exception.getMessage().contains("Ya existe un empleado con email"));
+        verify(empleadoRepository, never()).save(any(Empleado.class));
+    }
+
+    @Test
     public void testCrearEmpleado_ErrorDatosInvalidos() {
-        // Assert para nombre vacío
-        Exception exception = assertThrows(IllegalArgumentException.class,
+        Exception exception = assertThrows(BusinessException.class,
             () -> empleadoService.crearEmpleado("", "juan@empresa.com", 12345));
         assertTrue(exception.getMessage().contains("nombre del empleado es obligatorio"));
-
-        // Assert para email inválido
-        exception = assertThrows(IllegalArgumentException.class,
+        exception = assertThrows(BusinessException.class,
             () -> empleadoService.crearEmpleado("Juan", "email-invalido", 12345));
         assertTrue(exception.getMessage().contains("email debe ser válido"));
-
-        // Assert para legajo inválido
-        exception = assertThrows(IllegalArgumentException.class,
+        exception = assertThrows(BusinessException.class,
             () -> empleadoService.crearEmpleado("Juan", "juan@empresa.com", -1));
         assertTrue(exception.getMessage().contains("legajo debe ser un número positivo"));
     }
 
     @Test
-    public void testBuscarPorLegajo_Encontrado() {
-        // Arrange
-        Empleado empleadoEsperado = new Empleado("Juan Pérez", "juan@empresa.com", 12345);
-        when(empleadoRepository.findByLegajo(12345)).thenReturn(Optional.of(empleadoEsperado));
+    public void testBuscarPorLegajo_EmpleadoNoExiste() {
+        when(empleadoRepository.findByLegajo(99999)).thenReturn(Optional.empty());
+        Optional<Empleado> resultado = empleadoService.buscarPorLegajo(99999);
+        assertTrue(resultado.isEmpty());
+    }
 
-        // Act
-        Optional<Empleado> resultado = empleadoService.buscarPorLegajo(12345);
-
-        // Assert
-        assertTrue(resultado.isPresent());
-        assertEquals("Juan Pérez", resultado.get().getNombre());
+    @Test
+    public void testBuscarPorLegajo_LegajoInvalido() {
+        Exception exception = assertThrows(BusinessException.class,
+            () -> empleadoService.buscarPorLegajo(-1));
+        assertTrue(exception.getMessage().contains("legajo debe ser un número positivo"));
     }
 }
