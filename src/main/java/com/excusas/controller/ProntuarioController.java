@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/prontuarios")
-@CrossOrigin(origins = "*")
 public class ProntuarioController {
 
     @Autowired
